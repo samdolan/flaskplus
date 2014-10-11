@@ -95,9 +95,6 @@ class Application(object):
             app.logger.addHandler(mail_handler)
         """
 
-        debug_log = app.config['DEBUG_LOG']
-        error_log = app.config['ERROR_LOG']
-
         formatter = logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s '
             '[in %(pathname)s:%(lineno)d]')
@@ -105,6 +102,18 @@ class Application(object):
         stream_handler = StreamHandler()
         app.logger.setLevel(logging.INFO)
         app.logger.addHandler(stream_handler)
+
+        debug_log = app.config.get('DEBUG_LOG')
+        error_log = app.config.get('ERROR_LOG')
+
+        # Allow configurations to turn off file based logging and resort to stdout
+        if not debug_log:
+            app.logger.warn("Could not find debug log @ %s".format(debug_log))
+            return
+
+        if not error_log:
+            app.logger.warn("Could not find error log @ %s".format(error_log))
+            return
 
         debug_file_handler = \
             RotatingFileHandler(debug_log,
