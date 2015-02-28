@@ -106,32 +106,25 @@ class Application(object):
         debug_log = app.config.get('DEBUG_LOG')
         error_log = app.config.get('ERROR_LOG')
 
-        # Allow configurations to turn off file based logging and resort to stdout
-        if not debug_log:
-            app.logger.warn("Could not find debug log @ %s".format(debug_log))
-            return
+        if debug_log:
+            debug_file_handler = \
+                RotatingFileHandler(debug_log,
+                                    maxBytes=100000,
+                                    backupCount=10)
 
-        if not error_log:
-            app.logger.warn("Could not find error log @ %s".format(error_log))
-            return
+            debug_file_handler.setLevel(logging.DEBUG)
+            debug_file_handler.setFormatter(formatter)
+            app.logger.addHandler(debug_file_handler)
 
-        debug_file_handler = \
-            RotatingFileHandler(debug_log,
-                                maxBytes=100000,
-                                backupCount=10)
+        if error_log:
+            error_file_handler = \
+                RotatingFileHandler(error_log,
+                                    maxBytes=100000,
+                                    backupCount=10)
 
-        debug_file_handler.setLevel(logging.DEBUG)
-        debug_file_handler.setFormatter(formatter)
-        app.logger.addHandler(debug_file_handler)
-
-        error_file_handler = \
-            RotatingFileHandler(error_log,
-                                maxBytes=100000,
-                                backupCount=10)
-
-        error_file_handler.setLevel(logging.ERROR)
-        error_file_handler.setFormatter(formatter)
-        app.logger.addHandler(error_file_handler)
+            error_file_handler.setLevel(logging.ERROR)
+            error_file_handler.setFormatter(formatter)
+            app.logger.addHandler(error_file_handler)
 
     def setup_views(self, app):
         for url_prefix, blueprint in self.BLUEPRINTS.items():
